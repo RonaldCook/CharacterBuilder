@@ -28,26 +28,17 @@ class Stat extends Component {
     };
   }
 
-  getPointCost(currentPoints, oldValue, newValue) {
-    if(newValue < this.props.startingValue || newValue > this.props.maxValue) {
-      return 0;
-    }
-    
-    if(oldValue < newValue) {
-      if(newValue <= 13){
-        return 1;
-      } else {
-        return 2;
+  getPointCost(newValue) {
+    const oldValue = this.state.value;
+
+    if(newValue >= this.props.startingValue && newValue <= this.props.maxValue) {
+      if(oldValue < newValue) {
+        return (newValue <= 13 ? 1 : 2);
+      } else if(oldValue > newValue) {
+        return (newValue >= 13 ? 2 : 1);
       }
-    } else if(oldValue > newValue) {
-      if(newValue >= 13){
-        return 2;
-      } else {
-        return 1;
-      }
-    } else {
-      return 0;
     }
+    return 0;
   }
 
   addToAttributeScore() {
@@ -55,11 +46,11 @@ class Stat extends Component {
     const maxValue = this.props.maxValue;
     const currentPoints = this.props.currentPoints;
 
-    var pointCost = this.getPointCost(currentPoints, currentValue, currentValue + 1);
+    var pointCost = this.getPointCost(currentValue + 1);
 
-    if((pointCost && pointCost > 0) && (currentPoints >= pointCost) && (currentValue < maxValue)) {
+    if((pointCost > 0) && (currentPoints >= pointCost) && (currentValue < maxValue)) {
       var newValue = (currentValue + 1);
-      this.props.test(true, pointCost);
+      this.props.updateCurrentPoints(true, pointCost);
 
       this.setState({
         value: newValue
@@ -73,11 +64,11 @@ class Stat extends Component {
     const startingValue = this.props.startingValue;
     const currentPoints = this.props.currentPoints;
 
-    var pointCost = this.getPointCost(currentPoints, currentValue, currentValue - 1);
+    var pointCost = this.getPointCost(currentValue - 1);
 
-    if((currentPoints < startingPoints) && (currentValue > startingValue)  && (pointCost && pointCost > 0)) {
+    if((currentPoints < startingPoints) && (currentValue > startingValue) && (pointCost > 0)) {
       var newValue = (currentValue - 1);
-      this.props.test(false, pointCost);
+      this.props.updateCurrentPoints(false, pointCost);
 
       this.setState({
         value: newValue
@@ -139,9 +130,7 @@ class Builder extends Component {
         maxValue={maxValue}
         startingPoints={startingPoints}
         currentPoints={currentPoints}
-        test={this.updateCurrentPoints}
-        increaseCurrentPoints={this.updateCurrentPoints}
-        decreaseCurrentPoints={this.updateCurrentPoints}
+        updateCurrentPoints={this.updateCurrentPoints}
       />
     );
   }
